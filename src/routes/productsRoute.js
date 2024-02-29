@@ -1,7 +1,5 @@
-
 import { Router } from "express";
 import { ProductManager } from "../ProductManager.js";
-import { Server } from 'socket.io';
 import { io } from '../app.js';
 
 const routerProducts = Router();
@@ -101,7 +99,7 @@ routerProducts.delete("/:pid/", async (req, res) => {
   try {
     const { pid } = req.params;
 
-  
+
     const product = await productManager.getProductById(pid);
 
     if (!product) {

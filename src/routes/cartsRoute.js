@@ -1,4 +1,3 @@
-// cart router
 import { Router } from "express";
 import { CartsManager } from "../CartsManager.js";
 

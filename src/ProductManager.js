@@ -10,19 +10,19 @@ export class ProductManager {
 
     }
 
-    async handleData() { 
+    async handleData() {
 
         try {
             let data = await fs.promises.readFile(this.PATH, 'utf-8');
 
             if (data) {
-                this.products = JSON.parse(data); 
-                const lastProductId = this.products.reduce((maxId, product) => Math.max(maxId, product.id), 0); 
-                this.idCounter = lastProductId; 
+                this.products = JSON.parse(data);
+                const lastProductId = this.products.reduce((maxId, product) => Math.max(maxId, product.id), 0);
+                this.idCounter = lastProductId;
             }
         } catch (error) {
-            if (error.code === 'ENOENT') { 
-                
+            if (error.code === 'ENOENT') {
+
                 await fs.promises.writeFile(this.PATH, JSON.stringify(''), null, 2);
                 this.products = [];
                 return this.products;
@@ -35,7 +35,7 @@ export class ProductManager {
         }
     }
 
-    async saveData() { 
+    async saveData() {
         try {
             await fs.promises.writeFile(this.PATH, JSON.stringify(this.products), null, 2);
         } catch (error) {
@@ -56,16 +56,16 @@ export class ProductManager {
                 code: productData.code,
                 stock: productData.stock,
             };
-            this.products.push(newProduct); 
+            this.products.push(newProduct);
             this.idCounter++;
-            await this.saveData(); 
+            await this.saveData();
         } else {
             return error
         }
     }
 
     async getProducts() {
-        try { 
+        try {
             await this.handleData();
             return this.products;
         } catch (error) {
@@ -80,15 +80,15 @@ export class ProductManager {
             return product;
         } else {
             return { error: "El producto no existe", statusCode: 404 };
-        }                                                               
+        }
     }
 
     async updateProduct(id, newProductData) {
         await this.handleData();
 
         const product = this.products.find(product => product.id == id);
-        if (product) {                                                    
-            if (newProductData.hasOwnProperty('id')) { 
+        if (product) {
+            if (newProductData.hasOwnProperty('id')) {
                 throw new Error("No se permite modificar el ID del producto.");
             }
 
@@ -107,7 +107,7 @@ export class ProductManager {
     }
 
     async deleteProduct(id) {
-        await this.handleData(); 
+        await this.handleData();
         const productIndex = this.products.findIndex(product => product.id == id);
         if (productIndex === -1) {
             return null;
@@ -116,7 +116,7 @@ export class ProductManager {
         const deletedProduct = this.products.splice(productIndex, 1)[0];
         await this.saveData();
 
-        return deletedProduct; 
+        return deletedProduct;
     }
 }
 

@@ -11,31 +11,31 @@ const port = 8080;
 const productManager = new ProductManager();
 
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/products/",routerProducts)
-app.use("/api/carts/",cartsRoute)
-app.use(express.static(__dirname+'/public'))
-app.set('views',__dirname+'/views')
+app.use("/api/products/", routerProducts)
+app.use("/api/carts/", cartsRoute)
+app.use(express.static(__dirname + '/public'))
+app.set('views', __dirname + '/views')
 
 app.engine('handlebars', handlebars.engine())
-app.set ('view engine','handlebars')
+app.set('view engine', 'handlebars')
 
-const server = app.listen(port, ()=> console.log("Listending in port :", port))
-export const io=new Server(server)
+const server = app.listen(port, () => console.log("Listending in port :", port))
+export const io = new Server(server)
 
-io.on('connection', socket =>{
+io.on('connection', socket => {
 
-    console.log("Cliente Conectado!")
+  console.log("Cliente Conectado!")
 
-    socket.on('realTimeProducts', async () => {
-        try {
-          const products = await productManager.getProducts();
-          socket.emit('productos', products);
-        } catch (error) {
-          console.error('Error al obtener la lista de productos:', error);
-        }
-      });
+  socket.on('realTimeProducts', async () => {
+    try {
+      const products = await productManager.getProducts();
+      socket.emit('productos', products);
+    } catch (error) {
+      console.error('Error al obtener la lista de productos:', error);
+    }
+  });
 })
 
 
