@@ -22,16 +22,6 @@ routerProducts.get("/", async ({ query }, res) => {
   }
 });
 
-routerProducts.get('/realtimeproducts', async (req, res) => {
-  try {
-    const products = await productManager.getProducts();
-    res.render('realTimeProducts', { products: products });
-  } catch (error) {
-    console.error('Error al obtener la lista de productos:', error);
-    res.status(500).send('Error al obtener la lista de productos');
-  }
-});
-
 routerProducts.get("/:pid/", async (req, res) => {
   try {
     const { pid } = req.params;

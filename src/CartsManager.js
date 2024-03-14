@@ -23,7 +23,7 @@ export class CartsManager {
         this.carts = [];
         return this.carts;
       } else {
-        return error;
+        throw new Error("Error al cargar los datos")
       }
     }
   }
@@ -32,7 +32,7 @@ export class CartsManager {
     try {
       await fs.promises.writeFile(this.PATH, JSON.stringify(this.carts), null, 2);
     } catch (error) {
-      return error;
+      throw new Error("Error al guardar los datos")
     }
   }
 

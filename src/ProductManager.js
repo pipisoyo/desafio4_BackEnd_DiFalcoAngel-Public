@@ -29,8 +29,7 @@ export class ProductManager {
 
             } else {
 
-                return error
-
+                throw new Error ("Error al cargar los datos")
             }
         }
     }
@@ -39,7 +38,7 @@ export class ProductManager {
         try {
             await fs.promises.writeFile(this.PATH, JSON.stringify(this.products), null, 2);
         } catch (error) {
-            return error;
+            throw new Error("Error al guardar los datos")
         }
     }
 
@@ -60,7 +59,7 @@ export class ProductManager {
             this.idCounter++;
             await this.saveData();
         } else {
-            return error
+            throw new Error("Error a agregar el producto")
         }
     }
 
@@ -79,7 +78,7 @@ export class ProductManager {
         if (product) {
             return product;
         } else {
-            return { error: "El producto no existe", statusCode: 404 };
+              throw new Error ("El producto no existe");
         }
     }
 

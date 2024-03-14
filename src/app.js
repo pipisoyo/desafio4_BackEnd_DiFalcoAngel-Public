@@ -5,16 +5,19 @@ import handlebars from 'express-handlebars'
 import __dirname from "./utils.js";
 import { Server } from 'socket.io';
 import { ProductManager } from "./ProductManager.js";
+import { Router } from "express";
 
 const app = express();
 const port = 8080;
 const productManager = new ProductManager();
+const realTimeProducts = Router();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/products/", routerProducts)
 app.use("/api/carts/", cartsRoute)
+app.use("/api/realtimeproducts",realTimeProducts)
 app.use(express.static(__dirname + '/public'))
 app.set('views', __dirname + '/views')
 
@@ -38,4 +41,12 @@ io.on('connection', socket => {
   });
 })
 
-
+realTimeProducts.get('/', async (req, res) => {
+  try {
+    const products = await productManager.getProducts();
+    res.render('realTimeProducts', { products: products });
+  } catch (error) {
+    console.error('Error al obtener la lista de productos:', error);
+    res.status(500).send('Error al obtener la lista de productos');
+  }
+});
