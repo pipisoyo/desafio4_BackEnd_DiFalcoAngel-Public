@@ -1,39 +1,63 @@
+//import localRouterProducts from "./routes/localProductsRoute.js";
+//import localCartsRoute from "./routes/localCartsRoute.js";
+//import { localProductManager } from "./dao/services/localProductManager.js";
 import express from "express";
-import routerProducts from "./routes/productsRoute.js";
-import cartsRoute from "./routes/cartsRoute.js";
 import handlebars from 'express-handlebars'
 import __dirname from "./utils.js";
 import { Server } from 'socket.io';
-import { ProductManager } from "./ProductManager.js";
+import ProductManager from "./dao/services/productManager.js"
 import { Router } from "express";
+import mongoose from "mongoose";
+import productsRouter from "./routes/productsRoute.js";
+import cartsRoutes from "./routes/cartsRoute.js";
+import chatRouter from "./routes/chatRoute.js";
+import messagesModel from "./dao/models/messagess.js";
 
+//const productManager = new localProductManager();
 const app = express();
-const port = 8080;
-const productManager = new ProductManager();
+const PORT = process.env.PORT || 8080 ;
 const realTimeProducts = Router();
+const productManager = new ProductManager();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/products/", routerProducts)
-app.use("/api/carts/", cartsRoute)
-app.use("/api/realtimeproducts",realTimeProducts)
-app.use(express.static(__dirname + '/public'))
-app.set('views', __dirname + '/views')
+//app.use("/api/products/", localRouterProducts);
+//app.use("/api/carts/", localCartsRoute);
+app.use("/api/realtimeproducts",realTimeProducts);
+app.use(express.static(__dirname + '/public'));
+app.set('views', __dirname + '/views');
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRoutes);
+app.use("/api/chat/", chatRouter)
 
 app.engine('handlebars', handlebars.engine())
-app.set('view engine', 'handlebars')
+app.set('view engine', 'handlebars');
 
-const server = app.listen(port, () => console.log("Listending in port :", port))
+const connectMongoDB = async () => {
+  const DB_URL = 'mongodb+srv://difalcoangelnicolas:2tYYqNTiCyhp0u0r@ecommerce.gvda5c2.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=ecommerce';
+  const dataBase= 'ecommerce';
+  try {
+    await mongoose.connect(DB_URL, {dbName: dataBase });
+    console.log("Conectado a la base de datos 'ecommerce'");
+  } catch (error) {
+    console.error("No se pudo conectar a la base de datos", error);
+    process.exit();
+  }
+}
+
+connectMongoDB()
+
+
+const server = app.listen(PORT,()=>console.log("Server listening in", PORT))
 export const io = new Server(server)
 
 io.on('connection', socket => {
 
-  console.log("Cliente Conectado!")
-
+  console.log("Cliente realTimeProducts Conectado!");
   socket.on('realTimeProducts', async () => {
     try {
-      const products = await productManager.getProducts();
+      const products = await productManager.getAll()
       socket.emit('productos', products);
     } catch (error) {
       console.error('Error al obtener la lista de productos:', error);
@@ -43,10 +67,36 @@ io.on('connection', socket => {
 
 realTimeProducts.get('/', async (req, res) => {
   try {
-    const products = await productManager.getProducts();
+    const products = await productManager.getAll();
     res.render('realTimeProducts', { products: products });
   } catch (error) {
     console.error('Error al obtener la lista de productos:', error);
     res.status(500).send('Error al obtener la lista de productos');
   }
 });
+
+const msg = []
+
+io.on('connection', socket =>{
+
+    console.log("Mensageria conectada")
+
+    socket.on('message', async (data) => {
+      const message = new messagesModel({
+        email: data.user,
+        message: data.message,
+      });
+    
+      try {
+        await message.save();
+        console.log('Mensaje guardado correctamente');
+      } catch (error) {
+        console.error('Error al guardar el mensaje:', error);
+      }
+    
+      msg.push(data);
+      io.emit('messageLogs', msg);
+    });
+
+})  
+

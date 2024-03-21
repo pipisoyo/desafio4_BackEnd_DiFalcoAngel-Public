@@ -1,7 +1,7 @@
 import fs from 'fs'
-import __dirname from './utils.js';
+import __dirname from '../../utils.js';
 
-export class ProductManager {
+export class localProductManager {
     constructor() {
         this.products = [];
         this.idCounter = 0;
